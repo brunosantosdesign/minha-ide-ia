@@ -1,0 +1,17 @@
+Ignorar a pasta do ambiente virtual
+
+venv/
+
+Ignorar as pastas de cache do Python
+
+pycache/
+*.pyc
+
+Ignorar o cache de modelos do Hugging Face (se for criado localmente)
+
+.cache/
+
+Ignorar ficheiros de configuração de IDEs comuns
+
+.vscode/
+.idea/
