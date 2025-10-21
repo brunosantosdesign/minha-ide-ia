@@ -1,0 +1,9 @@
+# Framework da API
+fastapi
+uvicorn[standard]
+
+# Modelo de IA e bibliotecas de suporte
+transformers
+torch
+accelerate
+tokenizers
