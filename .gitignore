@@ -1,6 +1,7 @@
 Ignorar a pasta do ambiente virtual
 
 venv/
+/venv/
 
 Ignorar as pastas de cache do Python
 
