@@ -17,7 +17,9 @@ chats_collection = db["chats"]
 # ---------------------------
 # 2️⃣ Funções auxiliares
 # ---------------------------
-def create_chat(title="Novo Chat"):
+def create_chat(first_message=None):
+    # Define título como a primeira mensagem ou "Novo Chat"
+    title = first_message[:50] if first_message else "Novo Chat"
     chat = {
         "title": title,
         "created_at": datetime.utcnow(),
@@ -64,8 +66,12 @@ except Exception as e:
 # 4️⃣ Configuração FastAPI
 # ---------------------------
 app = FastAPI()
+
 class PromptRequest(BaseModel):
     prompt: str
+
+class TitleUpdateRequest(BaseModel):
+    new_title: str
 
 # ---------------------------
 # 5️⃣ Endpoint para gerar resposta
@@ -78,10 +84,19 @@ async def gerar_resposta(request: PromptRequest, chat_id: str = None):
     try:
         # Cria chat se não houver chat_id
         if not chat_id:
-            chat_id = create_chat()
-            print(f"[DEBUG] Novo chat criado: {chat_id}")
+            chat_id = create_chat(first_message=request.prompt)
+            print(f"[DEBUG] Novo chat criado: {chat_id} com título baseado na primeira mensagem")
         else:
             print(f"[DEBUG] Usando chat_id existente: {chat_id}")
+            # Atualiza título automaticamente se estiver como "Novo Chat"
+            chat = chats_collection.find_one({"_id": ObjectId(chat_id)})
+            if chat and chat.get("title") == "Novo Chat":
+                new_title = request.prompt[:50]  # Limite de 50 caracteres
+                chats_collection.update_one(
+                    {"_id": ObjectId(chat_id)},
+                    {"$set": {"title": new_title}}
+                )
+                print(f"[DEBUG] Título do chat atualizado com a primeira mensagem: {new_title}")
 
         # Salva mensagem do usuário
         add_message(chat_id, "user", request.prompt)
@@ -125,7 +140,7 @@ async def ver_chat(chat_id: str):
     return {"chat_id": chat_id, "messages": history}
 
 # ---------------------------
-# Endpoint para consultar todos os chats
+# 7️⃣ Endpoint para consultar todos os chats
 # ---------------------------
 @app.get("/chats")
 async def ver_todos_chats():
@@ -139,9 +154,8 @@ async def ver_todos_chats():
         })
     return {"chats": chats}
 
-
 # ---------------------------
-# 7️⃣ Endpoint para deletar chat
+# 8️⃣ Endpoint para deletar chat
 # ---------------------------
 @app.delete("/chats/{chat_id}")
 async def apagar_chat(chat_id: str):
@@ -149,12 +163,26 @@ async def apagar_chat(chat_id: str):
     return {"detail": "Chat deletado com sucesso."}
 
 # ---------------------------
-# 8️⃣ Montagem de arquivos estáticos
+# 9️⃣ Endpoint para atualizar título manualmente
+# ---------------------------
+@app.put("/chats/{chat_id}/titulo")
+async def atualizar_titulo(chat_id: str, request: TitleUpdateRequest):
+    new_title = request.new_title[:50]  # Limite de 50 caracteres
+    result = chats_collection.update_one(
+        {"_id": ObjectId(chat_id)},
+        {"$set": {"title": new_title}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Chat não encontrado ou título igual ao atual.")
+    return {"chat_id": chat_id, "new_title": new_title}
+
+# ---------------------------
+#  🔟 Montagem de arquivos estáticos
 # ---------------------------
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 # ---------------------------
-# 9️⃣ Execução do servidor
+# 1️⃣1️⃣ Execução do servidor
 # ---------------------------
 if __name__ == "__main__":
     import uvicorn
