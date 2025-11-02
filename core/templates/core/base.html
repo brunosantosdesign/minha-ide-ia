@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- O título da página será definido por cada página filha -->
+    <title>{% block title %}IDE de IA - PLN{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <!-- Bloco para CSS adicional, se a página filha precisar -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>IDE de IA</h1>
+            <p class="subtitle">Atividade da disciplina de Processamento de Linguagem Natural</p>
+            
+            <!-- Navegação Principal -->
+            <nav class="main-nav">
+                <a href="{% url 'index' %}">Chat</a>
+                <a href="{% url 'chat:historico' %}">Histórico</a>
+            </nav>
+        </header>
+
+        <!-- O conteúdo principal da página será inserido aqui -->
+        {% block content %}
+        {% endblock %}
+
+    </div>
+
+    <!-- O JavaScript principal é carregado no final -->
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>

@@ -53,6 +53,28 @@ body {
     color: #a0aec0;
 }
 
+/* Navegação adicionada no base.html */
+.main-nav {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+.main-nav a,
+.main-nav a:visited { 
+    color: var(--primary-color) !important;
+    text-decoration: none;
+    font-size: 1em;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+.main-nav a:hover {
+    background-color: #4a5568;
+}
+
+
 .chat-container {
     flex: 1;
     overflow-y: auto;
@@ -162,7 +184,21 @@ body {
 }
 
 /* Scrollbar */
-.chat-container::-webkit-scrollbar { width: 6px; }
-.chat-container::-webkit-scrollbar-track { background: transparent; }
-.chat-container::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 3px; }
-.chat-container::-webkit-scrollbar-thumb:hover { background: #718096; }
+.chat-container::-webkit-scrollbar,
+.history-list::-webkit-scrollbar {
+    width: 6px; 
+}
+.chat-container::-webkit-scrollbar-track,
+.history-list::-webkit-scrollbar-track { 
+    background: transparent; 
+}
+.chat-container::-webkit-scrollbar-thumb,
+.history-list::-webkit-scrollbar-thumb { 
+    background: #4a5568; 
+    border-radius: 3px; 
+}
+.chat-container::-webkit-scrollbar-thumb:hover,
+.history-list::-webkit-scrollbar-thumb:hover { 
+    background: #718096; 
+}
+

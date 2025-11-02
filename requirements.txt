@@ -1,9 +1,8 @@
-# Framework da API
-fastapi
-uvicorn[standard]
-
-# Modelo de IA e bibliotecas de suporte
+Django
+python-dotenv
 transformers
 torch
 accelerate
 tokenizers
+pymongo
+mongomock

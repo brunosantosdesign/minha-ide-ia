@@ -1,0 +1,31 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Detalhe do Chat - {{ chat.title }}{% endblock %}
+
+{% block content %}
+<!-- Reutiliza os estilos do chat, mas apenas para visualização -->
+<div class="chat-container" id="chatContainer">
+    
+    {% if chat.messages %}
+        {% for message in chat.messages %}
+        <div class="message message-{{ message.role }}">
+            <div class="message-content">
+                {{ message.content }}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+         <div class="message message-assistant">
+            <div class="message-content">Este chat não contém mensagens.</div>
+        </div>
+    {% endif %}
+
+</div>
+
+<!-- Remove o container de input, pois esta é uma página de apenas leitura -->
+<div class="input-container">
+    <a href="{% url 'chat:historico' %}" style="color: var(--primary-color); text-decoration: none; font-weight: bold; display: block; text-align: center;">
+        &larr; Voltar para o Histórico
+    </a>
+</div>
+{% endblock %}

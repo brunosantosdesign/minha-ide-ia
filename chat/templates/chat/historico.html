@@ -1,0 +1,237 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Histórico de Chats{% endblock %}
+
+{% block extra_css %}
+<!-- Adiciona estilos específicos para a página de histórico -->
+<style>
+    /* Estilos do formulário de filtro */
+    .filter-form {
+        padding: 20px;
+        background-color: #2d3748; /* Cor de fundo do card */
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        align-items: flex-end;
+    }
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 150px; /* Flex-grow, flex-shrink, flex-basis */
+    }
+    .filter-group label {
+        font-size: 0.9em;
+        color: #a0aec0;
+        margin-bottom: 5px;
+    }
+    .filter-input {
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        font-size: 1em;
+    }
+    .filter-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+    .filter-button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background-color: var(--primary-color);
+        color: #1a202c;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        height: 42px; /* Alinha com os inputs */
+    }
+    .filter-button:hover {
+        opacity: 0.9;
+    }
+    
+    /* NOVOS BOTÕES DE EXPORTAÇÃO */
+    .export-button {
+        padding: 10px 20px;
+        border: 1px solid var(--primary-color);
+        border-radius: 5px;
+        background-color: transparent;
+        color: var(--primary-color);
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s;
+        height: 42px;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        line-height: 20px; /* Ajusta o texto verticalmente */
+    }
+    .export-button:hover {
+        background-color: var(--primary-color);
+        color: #1a202c;
+    }
+    .export-button:visited {
+        color: var(--primary-color);
+    }
+    .export-button:hover:visited {
+        color: #1a202c;
+    }
+    /* --- Fim dos novos estilos --- */
+
+
+    /* Lista de histórico */
+    .history-list {
+        padding: 20px;
+        flex: 1;
+        overflow-y: auto;
+    }
+    .history-item {
+        background-color: #4a5568;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background-color 0.2s;
+    }
+    .history-item:hover {
+        background-color: #5a6578;
+    }
+    .history-item-info {
+        color: var(--text-color);
+        text-decoration: none;
+    }
+    .history-item-info h3 {
+        font-size: 1.1em;
+        margin-bottom: 5px;
+        color: var(--text-color);
+    }
+    .history-item-info p {
+        font-size: 0.9em;
+        color: #a0aec0;
+    }
+    .history-item-info:visited h3, .history-item-info:visited p {
+        color: var(--text-color);
+    }
+    .history-item-info:visited p {
+         color: #a0aec0;
+    }
+
+    .history-item-actions a, .history-item-actions a:visited {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: bold;
+    }
+    
+    /* Paginação */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        border-top: 1px solid var(--border-color);
+    }
+    .pagination a, .pagination .current {
+        color: var(--text-color);
+        padding: 8px 12px;
+        margin: 0 5px;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+    .pagination a:hover {
+        background-color: #4a5568;
+    }
+    .pagination a:visited {
+        color: var(--text-color);
+    }
+    .pagination .current {
+        background-color: var(--primary-color);
+        color: #1a202c;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Formulário de Filtro (agora inclui botões de exportação) -->
+<!-- O form usa method="GET" para que os filtros apareçam na URL -->
+<form method="GET" action="{% url 'chat:historico' %}" class="filter-form">
+    
+    <!-- Inputs de Filtro -->
+    <div class="filter-group">
+        <label for="query">Buscar por termo:</label>
+        <input type="text" id="query" name="query" class="filter-input" value="{{ current_query|default:'' }}" placeholder="Ex: html, css...">
+    </div>
+    <div class="filter-group">
+        <label for="date_from">Data Início:</label>
+        <input type="date" id="date_from" name="date_from" class="filter-input" value="{{ current_date_from|default:'' }}">
+    </div>
+    <div class="filter-group">
+        <label for="date_to">Data Fim:</label>
+        <input type="date" id="date_to" name="date_to" class="filter-input" value="{{ current_date_to|default:'' }}">
+    </div>
+    
+    <!-- Botão de Filtro -->
+    <button type="submit" class="filter-button">Filtrar</button>
+    
+    <!-- NOVOS BOTÕES DE EXPORTAÇÃO -->
+    <!-- Estes são links (<a>) que parecem botões. Eles apontam para as novas URLs de exportação
+         e incluem os parâmetros de filtro atuais ({{ filter_params }}) -->
+    <a href="{% url 'chat:exportar_historico' 'json' %}?{{ filter_params }}" class="export-button">Exportar JSON</a>
+    <a href="{% url 'chat:exportar_historico' 'csv' %}?{{ filter_params }}" class="export-button">Exportar CSV</a>
+</form>
+
+<!-- Lista de Histórico -->
+<div class="history-list">
+    
+    {% if error %}
+        <p style="text-align: center; padding: 20px; color: #f56565;">{{ error }}</p>
+    {% elif chats %}
+        {% for chat in chats %}
+        <div class="history-item">
+            <a href="{% url 'chat:chat_detalhe' chat.chat_id %}" class="history-item-info">
+                <h3>{{ chat.title|default:"Chat Antigo" }}</h3>
+                <p>
+                    Iniciado em: {{ chat.created_at|date:"d/m/Y H:i" }} | 
+                    Modelo: {{ chat.model_name|default:"desconhecido" }}
+                </p>
+            </a>
+            <div class="history-item-actions">
+                <a href="{% url 'chat:chat_detalhe' chat.chat_id %}">Ver Chat</a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="text-align: center; padding: 20px;">Nenhum histórico de chat encontrado{% if current_query or current_date_from or current_date_to %} com os filtros aplicados{% endif %}.</p>
+    {% endif %}
+
+</div>
+
+<!-- Paginação (ATUALIZADA para incluir filtros) -->
+{% if total_pages > 1 %}
+<div class="pagination">
+    
+    {% if page_obj.has_previous %}
+        <!-- Adiciona os parâmetros de filtro aos links de paginação -->
+        <a href="?{{ filter_params }}&page=1">&laquo; Primeira</a>
+        <a href="?{{ filter_params }}&page={{ page_obj.previous_page_number }}">Anterior</a>
+    {% endif %}
+
+    <span class="current">
+        Página {{ page_obj.number }} de {{ total_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+        <a href="?{{ filter_params }}&page={{ page_obj.next_page_number }}">Próxima</a>
+        <a href="?{{ filter_params }}&page={{ total_pages }}">Última &raquo;</a>
+    {% endif %}
+    
+</div>
+{% endif %}
+
+{% endblock %}
+
